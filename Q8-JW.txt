@@ -1,0 +1,85 @@
+
+//Q8 of hw2
+//Goal is to make a prirority queue that takes in a string named order and keeps in mind its priorities
+
+#include <iostream>
+#include <queue>
+#include <chrono>
+#include<windows.h>
+#include<time.h>
+#include <string>
+
+using namespace std;
+
+class Order {
+public:
+    string serial;
+    int priority; //priority, from highest to lowest is 3 to 0
+
+    Order(string serial1, int priority1) {
+        serial = serial1;
+        priority = priority1;
+    }
+
+};
+
+struct prio {
+    bool operator()(Order const& pr, Order const& pr1)
+    {//checks that the queue is ordered from highest to lowest priority
+        return pr.priority < pr1.priority;
+    }
+};
+
+void displaypq(priority_queue<Order, vector<Order>, prio> pq)
+{
+    priority_queue<Order, vector<Order>, prio> pq1 = pq;
+    while (!pq1.empty()) { 
+   cout << " " << pq1.top().serial;
+    pq1.pop(); 
+    }
+    cout << endl;
+}
+
+void processOrder(priority_queue<Order, vector<Order>, prio> order) {
+    cout << "Processing order #" <<order.top().serial<< "\n";
+    Sleep(rand() % 3000 + 500); //process time is randomized from 3 to 0.5 seconds   
+    cout << "Done! \n";
+    
+}
+
+
+
+
+
+int main()
+{
+    int orderSize;
+    cout << "How many randomized orders would you like? \n";
+    cin >> orderSize;
+    cout << endl;
+    srand(time(NULL));
+    priority_queue<Order, vector<Order>,prio> orders;
+    //each order consists of its random serial string and priority number
+    for (int i = 0; i < orderSize; i++) {
+        int rngserial = rand() % 21 + 0;
+        string serialid = to_string(rngserial);
+        //generates prio from 0, 1 , 2 and 3
+        int rngprio = rand() % 4 + 0;
+        cout << "Order received for item #" << serialid << " with priority " << rngprio << "! \n";
+        orders.push(Order(serialid, rngprio));
+    }
+    cout << "Custom order received for item #8 with priority 2! \n";
+    orders.push(Order("8", 2));
+    cout << "Custom order received for item #11 with priority 0! \n";
+    orders.push(Order("11", 0));
+    cout << "Custom order received for item #3 with priority 3! \n";
+    orders.push(Order("3",3));
+   
+    cout << "Here is the rearranged priority queue from first to last:";
+    displaypq(orders);
+    cout << "\n" << "Now processesing them." << endl;
+    while (!orders.empty()) { processOrder(orders); orders.pop(); }
+
+    return 0;
+}
+

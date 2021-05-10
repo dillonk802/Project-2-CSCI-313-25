@@ -1,0 +1,209 @@
+//Q9 of HW2
+//set up 4 prio queue with plane class withrvariables land time, takeoff time, and type 1 or 2 to generate if in 10% or 20% range. put 10% in shortest of 3, 20% in shortest of 2
+//as well as putting them in order thanks to prio, earliest takeoff should be in front
+
+#include <iostream>
+#include <queue>
+#include <time.h>
+#include <ctime>
+#include <cstdlib>
+using namespace std;
+
+class plane {
+public: 
+    
+   mutable int dTime = 0;
+    //eligiblity determines if eligible to choose from 3, 2 or 1 queues
+    int eligibility;
+
+    int id;
+    plane(int id1) {
+        
+        
+        id = id1;
+        eligibility = (rand() % 100) + 1;
+       
+    }
+   
+   
+    
+};
+
+struct lesserTime {
+    bool operator()(plane const& p, plane const& p1)
+    {    
+        return p.dTime > p1.dTime;
+    }
+};
+
+
+
+
+int main()
+{
+    srand(time(0));
+    int hours = 24;
+    //t1-4 are hours to be incremented to prevent departures at the same time
+    int t1 = 0; int t2 = 0; int t3 = 0; int t4 = 0;
+    priority_queue<plane, vector<plane>, lesserTime> roster;
+    priority_queue<plane, vector<plane>, lesserTime> R1;
+    priority_queue<plane, vector<plane>, lesserTime> R2;
+    priority_queue<plane, vector<plane>, lesserTime> R3;
+    priority_queue<plane, vector<plane>, lesserTime> R4;
+
+    //generate a 50 plane roster
+    int numPlanes = 50;
+    for (int i = 1; i <= numPlanes; i++) {
+        cout << "plane " << i << "added to roster" << endl;
+        roster.push(plane(i));
+
+    }
+    //now assign them to a runway depending on eligiblity 1-70, 71-90,91-100
+      
+   
+    while (!roster.empty()) {
+        
+        //at 70% chance planes will be funneled to the first runway
+        if (roster.top().eligibility <= 70) {
+            
+            cout << "Plane " << roster.top().id << " added to runway 1 at hour " << t1 << endl;
+            roster.top().dTime = t1;
+            R1.push(roster.top());
+            roster.pop();
+            t1++;
+
+        }
+
+        //at 20% chance planes will choose from runway 2 or 3, whichever has the smaller size
+        else if (roster.top().eligibility > 70 && roster.top().eligibility <= 90) {
+            if (R2.size() <= R3.size()) {
+                cout << "Plane " << roster.top().id << " added to runway 2 at hour " << t2 << endl;
+                roster.top().dTime = t2;
+                R2.push(roster.top());
+                roster.pop();
+                t2++;
+            }
+            else {
+                cout << "Plane " << roster.top().id << " added to runway 3 at hour " << t3 << endl;
+                roster.top().dTime = t3;
+                R3.push(roster.top());
+                roster.pop();
+                t3++;
+
+            }
+        }
+        //at 10% chance planes will choose from the smallest of runways 2, 3 , or 4
+        else if (roster.top().eligibility > 90 && roster.top().eligibility <= 100) {
+            if (R2.size() <= R3.size() && R2.size() <= R4.size()) {
+                cout << "Plane " << roster.top().id << " added to runway 2 at hour " << t2 << endl;
+                roster.top().dTime = t2;
+                R2.push(roster.top());
+                roster.pop();
+                t2++;
+            }
+
+            else if (R3.size() <= R2.size() && R3.size() <= R4.size()) {
+                cout << "Plane " << roster.top().id << " added to runway 3 at hour " << t3 << endl;
+                roster.top().dTime = t3;
+                R3.push(roster.top());
+                roster.pop();
+                t3++;
+            }
+
+            else if (R4.size() <= R2.size() && R4.size() <= R3.size()) {
+                cout << "Plane " << roster.top().id << " added to runway 4 at hour " << t4 << endl;
+                roster.top().dTime = t4;
+                R4.push(roster.top());
+                roster.pop();
+                t4++;
+
+
+            }
+
+
+        }
+
+
+    }
+
+    //copy queue for future schedule
+    priority_queue<plane, vector<plane>, lesserTime> S1 = R1;
+    priority_queue<plane, vector<plane>, lesserTime> S2 = R2;
+    priority_queue<plane, vector<plane>, lesserTime> S3 = R3;
+    priority_queue<plane, vector<plane>, lesserTime> S4 = R4;
+
+    if (roster.empty()){cout << "Every plane has been booked! Now showing runway display, with the earliest to leave on the left." << endl;  }
+    //print departure runways, each bracketed number represents a plane stationed for departure
+    cout << "\nRunway 1: ";
+    while (!R1.empty()) {
+        cout << "[" << R1.top().id << "]";
+        R1.pop();
+    }
+
+    cout << "\nRunway 2: ";
+    while (!R2.empty()) {
+        
+        cout << "[" << R2.top().id << "]";
+        R2.pop();
+    }
+
+    cout << "\nRunway 3: ";
+    while (!R3.empty()) {
+        
+        cout << "[" << R3.top().id << "]";
+        R3.pop();
+    }
+
+    cout << "\nRunway 4: ";
+    while (!R4.empty()) {
+        cout << "[" << R4.top().id << "]";
+        R4.pop();
+    }
+
+    //now to construct the calender
+    int days = 0;
+    int h = 0;
+    cout << endl << endl;
+
+    cout << "Time           RWAY1    RWAY2    RWAY3    RWAY4" << endl;
+
+
+
+    for (int i = 0; i < numPlanes; i++) {
+        if (h%24==0) {days++; }
+        cout << "Day" << days << "Hour" << i%24 << "     ";
+
+        if (!S1.empty()){
+            cout << "plane" << S1.top().id;
+            S1.pop();
+        }
+        cout << "   ";
+
+        if (!S2.empty()) {
+            cout << "plane" << S2.top().id;
+            S2.pop();
+        }
+        cout << "   ";
+
+        if (!S3.empty()) {
+            cout << "plane" << S3.top().id;
+            S3.pop();
+        }
+        cout << "   ";
+
+        if (!S4.empty()) {
+            cout << "plane" << S4.top().id;
+            S4.pop();
+        }
+        cout << "   " << endl;
+
+
+        h++;
+
+    }
+
+
+
+
+
+}
